@@ -8,8 +8,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 
-# Inicializar Firebase
-cred = credentials.Certificate("firebase_key.json")
+cred = credentials.Certificate("/etc/secrets/firebase_key.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -51,13 +50,11 @@ def index():
         text_y = qr_height + 10
         draw.multiline_text((text_x, text_y), text, fill='black', font=font, align='center')
 
-        # Convertir a base64 para mostrar en HTML
         img_io = BytesIO()
         combined_img.save(img_io, format='PNG')
         img_io.seek(0)
         qr_base64 = base64.b64encode(img_io.getvalue()).decode()
 
-        # Guardar datos en Firebase
         db.collection('entradas').document(qr_id).set({
             'evento': nombre_evento,
             'nombre': nombre_persona,
