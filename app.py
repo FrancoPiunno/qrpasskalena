@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, url_for
+from flask import Flask, render_template, request, send_file
 import qrcode
 import uuid
 from io import BytesIO
@@ -6,8 +6,8 @@ import base64
 from PIL import Image, ImageDraw, ImageFont
 import firebase_admin
 from firebase_admin import credentials, firestore
-import os
 
+# Inicializar Firebase con clave desde Render (secret file)
 cred = credentials.Certificate("/etc/secrets/firebase_key.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
@@ -28,9 +28,11 @@ def index():
         telefono = request.form['telefono']
         qr_id = str(uuid.uuid4())
 
-        qr_link = f"http://localhost:5000/entrada?id={qr_id}"
+        # URL pública (cambiar dominio si lo subís a producción)
+        qr_link = f"{request.url_root}entrada?id={qr_id}"
         qr_img = qrcode.make(qr_link).convert('RGB')
 
+        # Agregar datos debajo del QR
         qr_width, qr_height = qr_img.size
         extra_height = 100
         combined_img = Image.new('RGB', (qr_width, qr_height + extra_height), 'white')
@@ -50,11 +52,13 @@ def index():
         text_y = qr_height + 10
         draw.multiline_text((text_x, text_y), text, fill='black', font=font, align='center')
 
+        # Convertir a base64 para mostrar en HTML
         img_io = BytesIO()
         combined_img.save(img_io, format='PNG')
         img_io.seek(0)
         qr_base64 = base64.b64encode(img_io.getvalue()).decode()
 
+        # Guardar en Firestore
         db.collection('entradas').document(qr_id).set({
             'evento': nombre_evento,
             'nombre': nombre_persona,
@@ -70,6 +74,7 @@ def index():
         telefono=telefono,
         qr_id=qr_id
     )
+
 
 @app.route('/entrada')
 def verificar_qr():
@@ -92,6 +97,7 @@ def verificar_qr():
 
     return render_template("verificacion.html", estado=estado, nombre=nombre)
 
+
 @app.route('/descargar')
 def descargar_qr():
     qr_id = request.args.get('id')
@@ -100,8 +106,7 @@ def descargar_qr():
         return "❌ QR no encontrado", 404
 
     data = doc.to_dict()
-    qr_link = f"http://localhost:5000/entrada?id={qr_id}"
-
+    qr_link = f"{request.url_root}entrada?id={qr_id}"
     qr_img = qrcode.make(qr_link).convert('RGB')
 
     qr_width, qr_height = qr_img.size
@@ -111,10 +116,12 @@ def descargar_qr():
 
     draw = ImageDraw.Draw(combined_img)
     text = f"{data['evento']}\n{data['nombre']}\n{data['telefono']}"
+
     try:
         font = ImageFont.truetype("arial.ttf", 16)
     except:
         font = ImageFont.load_default()
+
     bbox = draw.textbbox((0, 0), text, font=font)
     text_width = bbox[2] - bbox[0]
     text_x = (qr_width - text_width) // 2
@@ -142,6 +149,7 @@ def descargar_qr():
         as_attachment=True,
         download_name=nombre_archivo
     )
+
 
 if __name__ == '__main__':
     app.run(debug=True)
