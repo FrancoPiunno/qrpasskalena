@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Entradas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" type="x-icon" href="{{ url_for('static', filename='webicon.png') }}">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');</style>
+</head>
+<body>
+    <div class="searcher">
+        <input type="text" placeholder="Buscar por nombre o evento" id="searchInput" onkeyup="filterTable()">
+        <script>
+            function filterTable() {
+                const input = document.getElementById('searchInput');
+                const filter = input.value.toLowerCase();
+                const table = document.querySelector('table');
+                const rows = table.getElementsByTagName('tr');
+                for (let i = 1; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName('td');
+                    let found = false;
+                    for (let j = 0; j < cells.length; j++) {
+                        if (cells[j].textContent.toLowerCase().includes(filter)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    rows[i].style.display = found ? '' : 'none';
+                }
+            }
+        </script>
+        <a href="{{ url_for('index') }}" style="text-decoration: none;"><button>Generar</button></a>
+        <a href="{{ url_for('ver_eventos') }}" style="text-decoration: none;" class="btn">Eventos</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Evento</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>ID</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entrada in entradas %}
+            <tr>
+                <td></td>
+                <td>{{ entrada.evento }}</td>
+                <td>{{ entrada.nombre }}</td>    
+                <td>{{ entrada.telefono }}</td>                
+                <td>{{ entrada.id }}</td>
+                <td>{{ entrada.estado }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('eliminar_entrada', entrada_id=entrada.id) }}">
+                        <button type="submit" onclick="return confirm('¿Eliminar esta entrada?')">x</button>
+                    </form>
+                </td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

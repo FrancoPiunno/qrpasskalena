@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Eventos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="shortcut icon" type="x-icon" href="{{ url_for('static', filename='webicon.png') }}">
+  <style>@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');</style>
+</head>
+<body>
+  <div class="searcher">
+    <a href="{{ url_for('registrar_evento') }}" style="text-decoration: none;"><button>Crear Eventos</button></a>
+    <a href="{{ url_for('lista_entradas') }}" style="text-decoration: none;"><button type="button">Entradas</button></a>
+  </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre del Evento</th>
+          <th>Fecha y Hora</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for evento in eventos %}
+        <tr>
+          <td>{{ evento.nombre }}</td>
+          <td>{{ evento.fecha_hora }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</body>
+</html>
