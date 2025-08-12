@@ -21,6 +21,42 @@ body {
   gap: 2rem;
 }
 
+menu {
+  gap: 3rem;
+  display: flex;
+  align-items: center;
+  margin-top: 100px;
+  margin-bottom: 200px;
+  min-width: 200px;
+  border-radius: 20px;
+  padding: 4rem;
+}
+
+menu a {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 20rem;
+  width: 20rem;
+  text-decoration: none;
+  background-color: #0000006c;
+  border: 1px solid #0000006c;
+  color: rgb(255, 255, 255);
+  font-size: 2rem;
+  padding: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+menu a svg {
+  height: 100px;
+  width: 100px;
+}
+
 .gencon{
   gap: 3rem;
   display: flex;
@@ -49,15 +85,13 @@ body {
   height: 100px;
 }
 
-.description-test {
-  gap: 0.5rem;
-  top: 0;
+.descriptiontest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   color: #ffffff;
   text-align: center;
   justify-content: center;
-  align-items: center;
-  display: flex;
-  flex-direction: column;
 }
 
 p {
@@ -115,6 +149,7 @@ p {
   color: rgb(0, 0, 0);
   font-size: 1rem;
   padding: 0.5rem;
+  border: 1px solid #ffffff;
   padding-left: 2rem;
   padding-right: 2rem;
   border-radius: 200px;
@@ -356,4 +391,61 @@ form {
 .mt-4 a:hover {
   background: #ffffff;
   color: rgb(0, 0, 0);
+}
+
+.genbuttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  align-items: right;
+}
+
+.genbuttons2 .alert-danger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.genbuttons2 {
+  display: flex;
+  gap: 1rem;
+  flex-direction: row;
+  justify-content: right;
+  align-items: right;
+  margin-top: 2vh;
+}
+
+.nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav a {
+  text-decoration: none;
+  background: #ffffff;
+  color: rgb(0, 0, 0);
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ffffff;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 200px;
+  cursor: pointer;
+}
+
+.nav .btn {
+  background-color: #0000006c;
+  border: 1px solid #0000006c;
+  color: rgb(255, 255, 255);
+  font-size: 1rem;
+  padding: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 200px;
+  cursor: pointer;
 }
