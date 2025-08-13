@@ -36,7 +36,7 @@
             }
         </script>
         <a href="{{ url_for('registrar_entrada') }}" style="text-decoration: none;"><button>Generar</button></a>
-        <a href="{{ url_for('ver_eventos') }}" style="text-decoration: none;" class="btn">Eventos</a>
+        <a href="{{ url_for('lista_eventos') }}" style="text-decoration: none;" class="btn">Eventos</a>
     </div>
     <table>
         <thead>
@@ -63,77 +63,72 @@
                 <td>{{ entrada.estado }}</td>
                  <td>
                     <div class="share2">
-                        <a href="{{ url_for('descargar_qr', id=entrada.id)}}" class="qrdown"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M352 96C352 78.3 337.7 64 320 64C302.3 64 288 78.3 288 96L288 306.7L246.6 265.3C234.1 252.8 213.8 252.8 201.3 265.3C188.8 277.8 188.8 298.1 201.3 310.6L297.3 406.6C309.8 419.1 330.1 419.1 342.6 406.6L438.6 310.6C451.1 298.1 451.1 277.8 438.6 265.3C426.1 252.8 405.8 252.8 393.3 265.3L352 306.7L352 96zM160 384C124.7 384 96 412.7 96 448L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 448C544 412.7 515.3 384 480 384L433.1 384L376.5 440.6C345.3 471.8 294.6 471.8 263.4 440.6L206.9 384L160 384zM464 440C477.3 440 488 450.7 488 464C488 477.3 477.3 488 464 488C450.7 488 440 477.3 440 464C440 450.7 450.7 440 464 440z"/></svg></a>
-                        <a href="#" class="qrdown"><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 30 30" onclick="sharePngWithText(event)"><path d="M 15 3 C 8.373 3 3 8.373 3 15 C 3 17.251208 3.6323415 19.350068 4.7109375 21.150391 L 3.1074219 27 L 9.0820312 25.431641 C 10.829354 26.425062 12.84649 27 15 27 C 21.627 27 27 21.627 27 15 C 27 8.373 21.627 3 15 3 z M 10.892578 9.4023438 C 11.087578 9.4023438 11.287937 9.4011562 11.460938 9.4101562 C 11.674938 9.4151563 11.907859 9.4308281 12.130859 9.9238281 C 12.395859 10.509828 12.972875 11.979906 13.046875 12.128906 C 13.120875 12.277906 13.173313 12.453437 13.070312 12.648438 C 12.972312 12.848437 12.921344 12.969484 12.777344 13.146484 C 12.628344 13.318484 12.465078 13.532109 12.330078 13.662109 C 12.181078 13.811109 12.027219 13.974484 12.199219 14.271484 C 12.371219 14.568484 12.968563 15.542125 13.851562 16.328125 C 14.986562 17.342125 15.944188 17.653734 16.242188 17.802734 C 16.540187 17.951734 16.712766 17.928516 16.884766 17.728516 C 17.061766 17.533516 17.628125 16.864406 17.828125 16.566406 C 18.023125 16.268406 18.222188 16.319969 18.492188 16.417969 C 18.766188 16.515969 20.227391 17.235766 20.525391 17.384766 C 20.823391 17.533766 21.01875 17.607516 21.09375 17.728516 C 21.17075 17.853516 21.170828 18.448578 20.923828 19.142578 C 20.676828 19.835578 19.463922 20.505734 18.919922 20.552734 C 18.370922 20.603734 17.858562 20.7995 15.351562 19.8125 C 12.327563 18.6215 10.420484 15.524219 10.271484 15.324219 C 10.122484 15.129219 9.0605469 13.713906 9.0605469 12.253906 C 9.0605469 10.788906 9.8286563 10.071437 10.097656 9.7734375 C 10.371656 9.4754375 10.692578 9.4023438 10.892578 9.4023438 z"></path></svg></a>
+                        <!-- Descargar PNG -->
+                        <a href="{{ url_for('descargar_qr', id=entrada.id) }}" class="qrdown" title="Descargar PNG">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                            <path d="M352 96C352 78.3 337.7 64 320 64C302.3 64 288 78.3 288 96L288 306.7L246.6 265.3C234.1 252.8 213.8 252.8 201.3 265.3C188.8 277.8 188.8 298.1 201.3 310.6L297.3 406.6C309.8 419.1 330.1 419.1 342.6 406.6L438.6 310.6C451.1 298.1 451.1 277.8 438.6 265.3C426.1 252.8 405.8 252.8 393.3 265.3L352 306.7L352 96zM160 384C124.7 384 96 412.7 96 448L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 448C544 412.7 515.3 384 480 384L433.1 384L376.5 440.6C345.3 471.8 294.6 471.8 263.4 440.6L206.9 384L160 384zM464 440C477.3 440 488 450.7 488 464C488 477.3 477.3 488 464 488C450.7 488 440 477.3 440 464C440 450.7 450.7 440 464 440z"/>
+                        </svg>
+                        </a>
+
+                        <!-- Compartir (Web Share / WhatsApp Web) -->
+                        <a href="#" class="qrdown" title="Compartir"
+                        onclick="return sharePngWithText(
+                            '{{ entrada.evento|e }}',
+                            '{{ entrada.nombre|e }}',
+                            '{{ entrada.telefono|e }}',
+                            '{{ url_for('descargar_qr', id=entrada.id, _external=True) }}',
+                            '{{ url_for('verificar', id=entrada.id, _external=True) }}'
+                        )">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="22" height="22">
+                            <path d="M 15 3 C 8.373 3 3 8.373 3 15 C 3 17.251208 3.6323415 19.350068 4.7109375 21.150391 L 3.1074219 27 L 9.0820312 25.431641 C 10.829354 26.425062 12.84649 27 15 27 C 21.627 27 27 21.627 27 15 C 27 8.373 21.627 3 15 3 z"></path>
+                        </svg>
+                        </a>
                     </div>
-                    <script>
-                        async function sharePngWithText(e) {
-                            e.preventDefault();
-
-                            // Datos para el mensaje
-                            const evento   = `{{ evento|e }}`;
-                            const nombre   = `{{ nombre|e }}`;
-                            const telefono = `{{ telefono|e }}`;
-                            const verifyUrl = `{{ verify_url or '' }}`;
-
-                            const text = [
-                            `Evento: ${evento}`,
-                            `Nombre: ${nombre}`,
-                            `Teléfono: ${telefono}`,
-                            verifyUrl ? `Verificar: ${verifyUrl}` : null
-                            ].filter(Boolean).join("\n");
-
-                            // 1) Conseguir el PNG como Blob
-                            let blob;
-                            const b64 = `{{ qr_base64 or '' }}`;
-                            try {
-                            if (b64) {
-                                // Usar la imagen ya renderizada (más rápido)
-                                const dataUrl = `data:image/png;base64,${b64}`;
-                                const res = await fetch(dataUrl);
-                                blob = await res.blob();
-                            } else {
-                                // O descargarla desde tu endpoint
-                                const res = await fetch(`{{ url_for('descargar_qr', id=qr_id) }}`);
-                                blob = await res.blob();
-                            }
-                            } catch (err) {
-                            console.error("No pude obtener el PNG:", err);
-                            alert("No se pudo preparar la imagen para compartir.");
-                            return;
-                            }
-
-                            // 2) Intentar Web Share API con archivos (móviles compatibles)
-                            try {
-                            const file = new File([blob], `qr_{{ qr_id }}.png`, { type: "image/png" });
-                            const shareData = { title: "QR Pass", text, files: [file] };
-
-                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                                await navigator.share(shareData);  // Abre hoja de compartir: elegís WhatsApp, contacto, y manda imagen+texto
-                                return;
-                            }
-                            } catch (err) {
-                            // Usuario canceló o no soportado: seguimos al fallback
-                            console.warn("Share con archivo falló o cancelado:", err);
-                            }
-
-                            // 3) Fallback para desktop: abrir WhatsApp Web con solo texto (no adjunta imagen por limitación de la plataforma)
-                            const downloadUrl = `{{ url_for('descargar_qr', id=qr_id, _external=True) }}`;
-                            const textoWeb = text + (downloadUrl ? `\nDescargar PNG: ${downloadUrl}` : "");
-                            window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(textoWeb)}`, "_blank");
-                        }
-                        </script>
-                </td>
-                <td>
-                    <form method="POST" action="{{ url_for('eliminar_entrada', entrada_id=entrada.id) }}">
-                        <button type="submit" onclick="return confirm('¿Eliminar esta entrada?')">x</button>
-                    </form>
                 </td>
                 <td></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-
 </body>
+
+<script>
+async function sharePngWithText(evento, nombre, telefono, downloadUrl, verifyUrl) {
+  try {
+    const textLines = [
+      `Evento: ${evento}`,
+      `Nombre: ${nombre}`,
+      `Teléfono: ${telefono}`,
+      verifyUrl ? `Verificar: ${verifyUrl}` : null
+    ].filter(Boolean);
+    const text = textLines.join("\n");
+
+    // Descargar PNG desde tu endpoint
+    const res = await fetch(downloadUrl);
+    const blob = await res.blob();
+
+    // Intentar Web Share API (móvil)
+    try {
+      const file = new File([blob], "qr.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: "QR Pass", text, files: [file] });
+        return false;
+      }
+    } catch (err) {
+      console.warn("Fallo Web Share con archivo:", err);
+    }
+
+    // Fallback: WhatsApp Web con texto + link de descarga
+    const textoWeb = text + (downloadUrl ? `\nDescargar PNG: ${downloadUrl}` : "");
+    window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(textoWeb)}`, "_blank");
+  } catch (err) {
+    console.error("No se pudo compartir:", err);
+    alert("No se pudo preparar la imagen para compartir.");
+  }
+  return false; // prevenir navegación del <a>
+}
+</script>
+
+
+
 </html>
