@@ -6,6 +6,8 @@ import uuid
 import qrcode
 import requests
 import json
+import re
+import unicodedata
 from datetime import timedelta, datetime
 from functools import wraps
 
@@ -110,7 +112,6 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     ]
 
     def wrap_line(txt, font, width_px):
-        # envoltorio simple por ancho aprox
         max_chars = max(1, width_px // 12)
         wrapped = []
         for paragraph in txt.split("\n"):
@@ -123,7 +124,6 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     # Medidas
     dummy = Image.new("RGB", (10, 10))
     ddraw = ImageDraw.Draw(dummy)
-    # alto del título
     title_w, title_h = ddraw.textbbox((0, 0), title, font=font_title)[2:]
 
     wrapped_lines, text_block_h = [], 0
@@ -171,6 +171,15 @@ def make_verification_url(entrada_id: str) -> str:
     if EXTERNAL_BASE_URL:
         return EXTERNAL_BASE_URL.rstrip("/") + path
     return (request.host_url.rstrip("/") + path)
+
+def safe_filename(text: str) -> str:
+    """Convierte a ASCII, saca tildes y deja solo letras, números, guiones y guiones bajos."""
+    if not text:
+        return "sin_nombre"
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    text = re.sub(r"[^\w\-]+", "_", text, flags=re.ASCII)
+    text = re.sub(r"_+", "_", text).strip("_")
+    return text[:60] or "sin_nombre"
 
 # =========================
 # Auth
@@ -297,17 +306,30 @@ def descargar_qr(id):
         return "Entrada no encontrada", 404
     e = snap.to_dict()
 
+    # Datos
+    nombre = e.get("nombre", "")
+    evento = e.get("evento", "")
+
+    # Genera el PNG
     qr_url = make_verification_url(id)
     png_bytes = build_qr_image_with_text(
         qr_url,
-        nombre=e.get("nombre", ""),
-        evento=e.get("evento", ""),
+        nombre=nombre,
+        evento=evento,
         telefono=e.get("telefono", "")
     )
 
+    # Nombre de archivo: Evento_Nombre.png (sanitizado)
+    fname = f"{safe_filename(evento)}_{safe_filename(nombre)}.png"
+
     buf = io.BytesIO(png_bytes)
     buf.seek(0)
-    return send_file(buf, mimetype="image/png", as_attachment=True, download_name=f"{id}.png")
+    return send_file(
+        buf,
+        mimetype="image/png",
+        as_attachment=True,
+        download_name=fname
+    )
 
 # ====== EVENTOS ======
 @app.route("/registrar_evento", methods=["GET", "POST"])
@@ -332,10 +354,8 @@ def lista_eventos():
     eventos = []
     for doc in eventos_ref:
         data = doc.to_dict() or {}
-        # Aseguramos tener una id usable por el template
-        data['id'] = data.get('id') or doc.id
+        data['id'] = data.get('id') or doc.id  # asegurar id usable en template
         eventos.append(data)
-    # (opcional) ordenar por fecha_hora si es ISO
     return render_template('eventos.html', eventos=eventos)
 
 @app.route('/eliminar_evento/<evento_id>', methods=['POST'])
@@ -347,6 +367,12 @@ def eliminar_evento(evento_id):
     except Exception as e:
         app.logger.exception("Error al eliminar evento")
         flash(f"Error al eliminar evento: {e}", "danger")
+    return redirect(url_for('lista_eventos'))
+
+# Alias para compatibilidad con templates viejos
+@app.route('/ver_eventos')
+@login_required
+def ver_eventos():
     return redirect(url_for('lista_eventos'))
 
 # =========================
@@ -405,7 +431,6 @@ def verificar_usar():
                 "usada_por_email": user.get("email")
             })
             data["estado"] = "usado"
-        # devolver siempre los datos para mostrarlos en el template
         return {
             "estado": data.get("estado", "invalido"),
             "nombre": data.get("nombre"),
@@ -422,9 +447,15 @@ def verificar_usar():
                            entrada_id=entrada_id)
 
 # =========================
-# Run (Render)
+# Utilidad temporal para depurar rutas (opcional)
+# =========================
+@app.get("/__map")
+def __map():
+    return "<pre>" + "\n".join(sorted(str(r) for r in app.url_map.iter_rules())) + "</pre>"
+
+# =========================
+# Run (Render / Local)
 # =========================
 if __name__ == "__main__":
-    # Render asigna el puerto mediante la variable de entorno PORT
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=DEBUG)
