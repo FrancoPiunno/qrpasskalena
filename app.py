@@ -5,6 +5,7 @@ import base64
 import uuid
 import qrcode
 import requests
+import json
 from datetime import timedelta, datetime
 from functools import wraps
 
@@ -15,15 +16,36 @@ from google.cloud import firestore as gcf_firestore  # para @transactional
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 
+# =========================
+# App & Config
+# =========================
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
 
-# --- CONFIG ---
-FIREBASE_WEB_API_KEY = os.environ.get("FIREBASE_WEB_API_KEY", "TU_API_KEY_WEB")  # Console > Config > app web
-EXTERNAL_BASE_URL = os.environ.get("EXTERNAL_BASE_URL")  # ej: http://192.168.0.23:5000 o https://xxx.ngrok.io
+DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 
-# --- Firebase Admin ---
-cred = credentials.Certificate("firebase_key.json")
+FIREBASE_WEB_API_KEY = os.environ.get("FIREBASE_WEB_API_KEY", "TU_API_KEY_WEB")
+# En Render podés setear EXTERNAL_BASE_URL (recomendado). Si no, intenta con RENDER_EXTERNAL_URL.
+EXTERNAL_BASE_URL = os.environ.get("EXTERNAL_BASE_URL") or os.environ.get("RENDER_EXTERNAL_URL")
+
+# =========================
+# Firebase Admin (clave desde env o archivo)
+# =========================
+def load_firebase_credentials():
+    env_key = os.environ.get("FIREBASE_KEY_JSON")
+    if env_key:
+        try:
+            # Acepta JSON crudo o base64
+            txt = env_key if env_key.strip().startswith("{") else base64.b64decode(env_key).decode("utf-8")
+            data = json.loads(txt)
+            return credentials.Certificate(data)
+        except Exception as e:
+            # Fallback a archivo
+            print("WARN: No pude parsear FIREBASE_KEY_JSON, usando firebase_key.json. Error:", e)
+    # Si no hay env o falló, usar archivo en el repo
+    return credentials.Certificate("firebase_key.json")
+
+cred = load_firebase_credentials()
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -176,7 +198,7 @@ def login():
                 session_cookie,
                 max_age=int(expires_in.total_seconds()),
                 httponly=True,
-                secure=False if app.debug else True,  # True en prod (HTTPS)
+                secure=not DEBUG,  # True en Render (HTTPS)
                 samesite="Lax",
             )
             return resp
@@ -320,7 +342,7 @@ def verificar():
                                entrada_id=None)
 
     snap = db.collection("entradas").document(entrada_id).get()
-    if not snap.exists:   # <-- ✅ propiedad, sin paréntesis
+    if not snap.exists:
         return render_template("verificacion.html",
                                estado="invalido",
                                nombre=None, evento=None, telefono=None,
@@ -335,7 +357,6 @@ def verificar():
         telefono=e.get("telefono"),
         entrada_id=entrada_id
     )
-
 
 @app.route("/verificar/usar", methods=["POST"])
 @login_required
@@ -380,9 +401,9 @@ def verificar_usar():
                            entrada_id=entrada_id)
 
 # =========================
-# Run
+# Run (Render)
 # =========================
 if __name__ == "__main__":
-    # Para probar desde el celular en tu LAN, escuchá en 0.0.0.0
-    # y seteá EXTERNAL_BASE_URL="http://TU_IP_LOCAL:5000" (o https://xxx.ngrok.io)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Render asigna el puerto mediante la variable de entorno PORT
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=DEBUG)
