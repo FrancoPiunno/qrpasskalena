@@ -40,15 +40,25 @@
     <table>
       <thead>
         <tr>
+          <th></th>
           <th>Nombre del Evento</th>
           <th>Fecha y Hora</th>
+          <th>Borrar</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         {% for evento in eventos %}
         <tr>
+          <td></td>
           <td>{{ evento.nombre }}</td>
           <td>{{ evento.fecha_hora }}</td>
+          <td>
+             <form method="POST" action="{{ url_for('eliminar_evento', evento_id=evento.id) }}">
+                <button type="submit" onclick="return confirm('¿Eliminar este evento?')">x</button>
+              </form>
+          </td>
+          <td></td>
         </tr>
         {% endfor %}
       </tbody>

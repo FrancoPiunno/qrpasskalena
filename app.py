@@ -321,12 +321,27 @@ def registrar_evento():
         return redirect(url_for("ver_eventos"))
     return render_template("registrar_evento.html")
 
-@app.route("/eventos")
-@login_required
-def ver_eventos():
-    docs = db.collection("eventos").stream()
-    eventos = [doc.to_dict() for doc in docs]
-    return render_template("eventos.html", eventos=eventos)
+
+@app.route('/eventos')
+def lista_eventos():
+    eventos_ref = db.collection('eventos').stream()
+    eventos = []
+    for doc in eventos_ref:
+        data = doc.to_dict()
+        data['id'] = doc.id  # necesario para usarlo en eliminar_evento
+        eventos.append(data)
+    return render_template('eventos.html', eventos=eventos)
+
+@app.route('/eliminar_evento/<evento_id>', methods=['POST'])
+def eliminar_evento(evento_id):
+    try:
+        db.collection('eventos').document(evento_id).delete()
+        print(f"Evento {evento_id} eliminado correctamente.")
+    except Exception as e:
+        print(f"Error al eliminar evento: {e}")
+    return redirect(url_for('lista_eventos'))
+
+
 
 # =========================
 # Verificación en dos pasos
