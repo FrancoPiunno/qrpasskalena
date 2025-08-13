@@ -4,7 +4,6 @@ __pycache__/
 
 firebase_key.json
 
-*.png
 *.db
 
 .vscode/
