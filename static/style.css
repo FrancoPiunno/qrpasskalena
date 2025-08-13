@@ -9,7 +9,7 @@
 
 body {
   background-image: url("/static/fondo.jpg");
-  background-size: wrap;
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: #000;
@@ -58,6 +58,7 @@ menu a svg {
 }
 
 .gencon{
+  position: absolute;
   gap: 3rem;
   display: flex;
   align-items: center;
@@ -68,6 +69,47 @@ menu a svg {
   padding: 4rem;
   background-color: #00000071;
 }
+
+.vercon{
+  gap: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 3rem;
+  margin-top: 100px;
+  margin-bottom: 200px;
+  min-width: 200px;
+  border-radius: 20px;
+  padding: 4rem;
+  background-color: #00000071;
+}
+
+.vercon a{
+  background-color: #0000006c;
+  border: 1px solid #0000006c;
+  color: rgb(255, 255, 255);
+  font-size: 1rem;
+  padding: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 200px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btnver{
+  background-color: #00aa55b6;
+  border: 1px solid #00aa55b6;
+  color: rgb(255, 255, 255);
+  font-size: 1rem;
+  padding: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 200px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 
 /* --- TÍTULOS Y TEXTOS --- */
 .description {
@@ -266,7 +308,7 @@ a button:hover {
 }
 
 
-table {
+table {  
   border-radius: 20px;
   font-size: small;
   width: 1200px;
@@ -279,6 +321,7 @@ table button {
   border: none;
   outline: none;
   color: #830000;
+
   border-radius: 200px;
   height: 30px;
   width: 30px;
@@ -375,24 +418,6 @@ form {
   justify-content: center;
 }
 
-.mt-4 a {
-  margin-right: 0.7rem;
-  font-weight: bold;
-  font-size: 1rem;
-  padding: 0.5rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
-  border-radius: 200px;
-  cursor: pointer;
-  background-color: #000;
-  color: #ffffff;
-}
-
-.mt-4 a:hover {
-  background: #ffffff;
-  color: rgb(0, 0, 0);
-}
-
 .genbuttons {
   display: flex;
   flex-direction: row;
@@ -418,6 +443,12 @@ form {
 }
 
 .nav {
+  padding: 1rem;
+  background-color: #0000006c;
+  border-radius: 200px;
+  overflow: hidden;
+  position: absolute;
+  top: 3rem;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -426,26 +457,97 @@ form {
 }
 
 .nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  width: 50px;
   text-decoration: none;
   background: #ffffff;
-  color: rgb(0, 0, 0);
-  font-size: 1rem;
-  padding: 0.5rem;
   border: 1px solid #ffffff;
-  padding-left: 2rem;
-  padding-right: 2rem;
   border-radius: 200px;
   cursor: pointer;
 }
 
 .nav .btn {
-  background-color: #0000006c;
+  background-color: #e62a2a6c;
   border: 1px solid #0000006c;
-  color: rgb(255, 255, 255);
-  font-size: 1rem;
-  padding: 0.5rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  height: 50px;
+  width: 50px;
+  text-decoration: none;
   border-radius: 200px;
   cursor: pointer;
+}
+
+.nav a svg{
+  height: 32px;
+  width: 32px;
+}
+
+.mt-4 a {
+  height: 40px;
+  width: 40px;
+  border-radius: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.share {
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.share a {
+  height: 40px;
+  width: 40px;
+  border-radius: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.share a svg{
+  height: 30px;
+  width: 30px;
+}
+
+.share2 {
+  flex-direction: row;
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  gap: 1rem;
+}
+
+.share2 a {
+  height: 32px;
+  width: 32px;
+  border-radius: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.share2 a svg{
+  height: 25px;
+  width: 25px;
+}
+
+.qrdata {
+  font-size: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
