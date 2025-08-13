@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file, make_response
+from flask import Flask, render_template, request, redirect, url_for, send_file, make_response, flash
 import os
 import io
 import base64
@@ -45,8 +45,11 @@ def load_firebase_credentials():
     # Si no hay env o falló, usar archivo en el repo
     return credentials.Certificate("firebase_key.json")
 
-cred = load_firebase_credentials()
-firebase_admin.initialize_app(cred)
+# Evitar doble inicialización
+if not firebase_admin._apps:
+    cred = load_firebase_credentials()
+    firebase_admin.initialize_app(cred)
+
 db = firestore.client()
 
 # =========================
@@ -306,6 +309,7 @@ def descargar_qr(id):
     buf.seek(0)
     return send_file(buf, mimetype="image/png", as_attachment=True, download_name=f"{id}.png")
 
+# ====== EVENTOS ======
 @app.route("/registrar_evento", methods=["GET", "POST"])
 @login_required
 def registrar_evento():
@@ -318,30 +322,32 @@ def registrar_evento():
             "fecha_hora": fecha_hora,
             "id": evento_id
         })
-        return redirect(url_for("ver_eventos"))
+        return redirect(url_for("lista_eventos"))
     return render_template("registrar_evento.html")
 
-
-@app.route('/eventos')
+@app.route('/eventos', endpoint='lista_eventos')
+@login_required
 def lista_eventos():
     eventos_ref = db.collection('eventos').stream()
     eventos = []
     for doc in eventos_ref:
-        data = doc.to_dict()
-        data['id'] = doc.id  # necesario para usarlo en eliminar_evento
+        data = doc.to_dict() or {}
+        # Aseguramos tener una id usable por el template
+        data['id'] = data.get('id') or doc.id
         eventos.append(data)
+    # (opcional) ordenar por fecha_hora si es ISO
     return render_template('eventos.html', eventos=eventos)
 
 @app.route('/eliminar_evento/<evento_id>', methods=['POST'])
+@login_required
 def eliminar_evento(evento_id):
     try:
         db.collection('eventos').document(evento_id).delete()
-        print(f"Evento {evento_id} eliminado correctamente.")
+        flash("Evento eliminado correctamente.", "success")
     except Exception as e:
-        print(f"Error al eliminar evento: {e}")
+        app.logger.exception("Error al eliminar evento")
+        flash(f"Error al eliminar evento: {e}", "danger")
     return redirect(url_for('lista_eventos'))
-
-
 
 # =========================
 # Verificación en dos pasos
