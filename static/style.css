@@ -8,6 +8,7 @@
 
 
 body {
+  padding-bottom: 10rem;
   background-image: url("/static/fondo.jpg");
   background-size: cover;
   background-position: center;
@@ -21,15 +22,26 @@ body {
   gap: 2rem;
 }
 
+@media (max-width: 768px) {
+  body {
+    padding-top: 4.5rem;
+    padding-bottom: 0rem;
+}}
+
 menu {
   gap: 3rem;
   display: flex;
-  align-items: center;
-  margin-top: 100px;
-  margin-bottom: 200px;
-  min-width: 200px;
-  border-radius: 20px;
   padding: 4rem;
+}
+
+@media (max-width: 768px) {
+  menu {
+    gap: 2rem;
+    padding: 2rem;
+    flex-direction: column;
+    align-items: center;
+  }
+  
 }
 
 menu a {
@@ -58,16 +70,50 @@ menu a svg {
 }
 
 .gencon{
-  position: absolute;
   gap: 3rem;
   display: flex;
   align-items: center;
-  margin-top: 100px;
-  margin-bottom: 200px;
   min-width: 200px;
   border-radius: 20px;
   padding: 4rem;
   background-color: #00000071;
+}
+
+@media (max-width: 768px) {
+  .gencon {
+    gap: 1rem;
+    padding: 2rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .formulario {
+    align-items: right;
+    justify-content: right;
+  }
+
+  .mt-4 {
+    width: 100%;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .mt-4 h4 {
+    font-size: 2.2rem;
+  }
+
+  .mt-4 p {
+    font-size: 1.5rem;
+  }
+  
+  .mt-4 .share a {
+    height: 60px;
+    width: 60px;
+  }
+}
+
+.inputs {
+    width: 100%;
 }
 
 .vercon{
@@ -154,10 +200,10 @@ p {
 
 /* --- FORMU --- */
 .formulario {
+  min-width: 350px;
   gap: 1rem;
   display: flex;
   flex-direction: column;
-  width: 20vw;
 }
 
 .mb-3 input,
@@ -257,6 +303,16 @@ a button:hover {
   gap: 1rem;
 }
 
+@media (max-width: 1300px)   {
+  .searcher {
+    width: 85%;
+  }
+
+  .searcher .btn {
+    display: none;
+  }
+} 
+
 .searcher input,
 .searcher textarea {
   border: none;
@@ -309,12 +365,23 @@ a button:hover {
 
 
 table {  
+  top: 20rem;
   border-radius: 20px;
   font-size: small;
   width: 1200px;
   border-collapse: collapse;
   background-color: #0000004b;
   overflow: hidden
+}
+
+@media (max-width: 1300px)  {
+  table {
+    width: 85%;
+  }
+
+  .searcher .btn {
+    display: none5t;
+  }
 }
 
 table button {
