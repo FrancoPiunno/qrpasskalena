@@ -10,6 +10,7 @@ import re
 import unicodedata
 from datetime import timedelta, datetime
 from functools import wraps
+from collections import Counter
 
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
@@ -290,7 +291,11 @@ def lista_entradas():
     docs = db.collection("entradas").stream()
     entradas = [doc.to_dict() for doc in docs]
     entradas.sort(key=lambda e: e.get("creada_en", ""), reverse=True)
-    return render_template("lista.html", entradas=entradas)
+    conteo_eventos = Counter(
+        (e.get("evento") or "(Sin evento)") for e in entradas
+    )
+    return render_template("lista.html", entradas=entradas, conteo_eventos=conteo_eventos)
+
 
 @app.route("/eliminar/<entrada_id>", methods=["POST"])
 @login_required
