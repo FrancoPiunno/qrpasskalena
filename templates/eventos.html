@@ -4,78 +4,92 @@
   <meta charset="utf-8">
   <title>Eventos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="shortcut icon" type="x-icon" href="{{ url_for('static', filename='webicon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=7">
   <style>@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');</style>
 </head>
 <body>
-  <div class="eve">
-      <div class="nav">
-      <a href="{{ url_for('index') }}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#000000" d="M341.8 72.6C329.5 61.2 310.5 61.2 298.3 72.6L74.3 280.6C64.7 289.6 61.5 303.5 66.3 315.7C71.1 327.9 82.8 336 96 336L112 336L112 512C112 547.3 140.7 576 176 576L464 576C499.3 576 528 547.3 528 512L528 336L544 336C557.2 336 569 327.9 573.8 315.7C578.6 303.5 575.4 289.5 565.8 280.6L341.8 72.6zM304 384L336 384C362.5 384 384 405.5 384 432L384 528L256 528L256 432C256 405.5 277.5 384 304 384z"/></svg></a>
-      <a href="{{ url_for('logout') }}" class="btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#ffffff" d="M224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160zM566.6 342.6C579.1 330.1 579.1 309.8 566.6 297.3L438.6 169.3C426.1 156.8 405.8 156.8 393.3 169.3C380.8 181.8 380.8 202.1 393.3 214.6L466.7 288L256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L466.7 352L393.3 425.4C380.8 437.9 380.8 458.2 393.3 470.7C405.8 483.2 426.1 483.2 438.6 470.7L566.6 342.7z"/></svg></a>
+  
+  <!-- Contenedor Principal (Reutilizamos estilos base pero añadimos clase específica) -->
+  <div class="main-layout events-page">
+    
+    <!-- Encabezado / Acciones -->
+    <div class="events-container">
+      
+      <div class="events-header">
+        <!-- Buscador -->
+        <div class="search-box">
+          <input type="text" placeholder="Buscar evento..." id="searchInput" onkeyup="filterTable()">
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="action-buttons">
+          <a href="{{ url_for('registrar_evento') }}" class="btn-create">Crear</a>
+          <a href="{{ url_for('lista_entradas') }}" class="btn-secondary">Entradas</a>
+        </div>
+      </div>
+
+      <!-- Tabla de Datos -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nombre del Evento</th>
+              <th>Fecha y Hora</th>
+              <th class="text-center">Borrar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for evento in eventos %}
+            <tr>
+              <td data-label="Nombre del Evento">{{ evento.nombre }}</td>
+              <td data-label="Fecha y Hora">{{ evento.fecha_hora }}</td>
+              <td data-label="Borrar" class="text-center">
+                <form method="POST" action="{{ url_for('eliminar_evento', evento_id=evento.id) }}" onsubmit="return confirm('¿Eliminar este evento?')">
+                  <button type="submit" class="btn-delete">x</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+            {% if not eventos %}
+            <tr>
+              <td colspan="3" class="text-center text-muted py-4">No hay eventos cargados.</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
     </div>
-
-  <div class="searcher">
-            <input type="text" placeholder="Buscar evento" id="searchInput" onkeyup="filterTable()">
-        <script>
-            function filterTable() {
-                const input = document.getElementById('searchInput');
-                const filter = input.value.toLowerCase();
-                const table = document.querySelector('table');
-                const rows = table.getElementsByTagName('tr');
-                for (let i = 1; i < rows.length; i++) {
-                    const cells = rows[i].getElementsByTagName('td');
-                    let found = false;
-                    for (let j = 0; j < cells.length; j++) {
-                        if (cells[j].textContent.toLowerCase().includes(filter)) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    rows[i].style.display = found ? '' : 'none';
-                }
-            }
-        </script>
-      <a href="{{ url_for('registrar_evento') }}" style="text-decoration: none;"><button>Crear</button></a>
-      <a href="{{ url_for('lista_entradas') }}" style="text-decoration: none;" class="btn">Entradas</a>
+    
+    <!-- Botón flotante para volver al inicio -->
+    <div class="nav-logout">
+        <a href="{{ url_for('index') }}" class="btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#ffffff" d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l-.8 16.2c-.6 16.7-14.2 30.1-30.8 30.1l-61.2 0c-26.5 0-48-21.5-48-48l0-58.8c0-2.6-.5-5.3-2.3-7.2l-21.3-20.9c-10.8-10.6-26.4-15.5-41.2-12.9l-22.3 3.9c-7.9 1.4-14.8 6.1-18.7 13.1l-18.1 31.8c-10.4 18.3-29.8 29.5-50.8 29.5L68 431.7c-17.7 0-32-14.3-32-32l0-143.7L19.5 256c-18 0-32.5-14-32.5-32l0-18.5c0-1.9 .2-3.8 .6-5.7C5.4 196.8 14 181.7 6.1 173.1c98.2 87.5 98.7 87.9 101.6c4-7.5 9.4-14.3 16-20.3L258.8 35.9C271.7 24.3 288.7 18 306 18s34.3 6.3 47.2 18l158 142.3c3.4 3.1 6.5 6.6 9.3 10.5c3.2-3.4 6-7.3 8.3-11.6c-2.7-4.1-5.7-8-9-11.7l-9.6-10.8C502.6 146.9 496 134.9 496 122.3l0-64c0-17.7-14.3-32-32-32l-32 0c-17.7 0-32 14.3-32 32l0 19.6L375.4 56.4c17.5-15.8 40.5-24.4 64.2-24.4s46.7 8.6 64.2 24.4L640.7 178c10.5 9.4 17.2 22.8 17.2 37.6l0 10.9c0 17.3-14 31.3-31.3 31.3c-2.3 0-4.6-.2-6.8-.7c-.6 2.4-.9 4.9-.9 7.4l0 17.6c-12.4 5-25.9 7.7-40 7.7c-9 0-17.8-1-26.2-2.9z"/></svg>
+        </a>
     </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Nombre del Evento</th>
-            <th>Fecha y Hora</th>
-            <th>Borrar</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for evento in eventos %}
-          <tr>
-            <td></td>
-            <td>{{ evento.nombre }}</td>
-            <td>{{ evento.fecha_hora }}</td>
-            <td>
-              <form method="POST" action="{{ url_for('eliminar_evento', evento_id=evento.id) }}" onsubmit="return confirm('¿Eliminar este evento?')">
-                <button type="submit" onclick="return confirm('¿Eliminar esta entrada?')">x</button>
-              </form>
-            </td>
-            <td></td>
-          </tr>
-          {% endfor %}
-          {% if not eventos %}
-          <tr>
-            <td colspan="5" class="text-center text-muted py-4">No hay eventos cargados.</td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
-
 
   </div>
   
+  <script>
+    function filterTable() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const table = document.querySelector('table');
+        const rows = table.getElementsByTagName('tr');
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName('td');
+            let found = false;
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].textContent.toLowerCase().includes(filter)) {
+                    found = true;
+                    break;
+                }
+            }
+            rows[i].style.display = found ? '' : 'none';
+        }
+    }
+  </script>
 </body>
 </html>
