@@ -87,11 +87,79 @@ def inject_user():
 # =========================
 def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: str) -> bytes:
     """
-    Genera un PNG con el QR (centro) y los textos abajo (Nombre, Evento, Teléfono).
-    Devuelve bytes PNG.
+    Genera un PNG con el QR (centro) y los textos abajo.
+    Si existe 'static/ticket_template.png', usa eso de fondo.
+    Si no, usa fondo blanco generado.
     """
     # 1) QR base
     qr_img = qrcode.make(qr_url).convert("RGB")
+    
+    # Check for template
+    template_path = os.path.join(app.root_path, 'static', 'ticket_template.png')
+    
+    if os.path.exists(template_path):
+        # --- MODO TEMPLATE ---
+        try:
+            bg = Image.open(template_path).convert("RGB")
+            W, H = bg.size
+            
+            # NUEVO TEMPLATE (1080 x 1445 aprox)
+            # Caja blanca estimada: 900px ancho? No, el usuario dijo "entra bien".
+            # Ajustamos proporcionalmente. Antes era 420 para 740W.
+            # Ahora 1080W. Probemos QR de 650px.
+            qr_size = 650
+            qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
+            
+            # Posición: Centrado horizontal
+            qr_x = (W - qr_size) // 2
+            
+            # Vertical: El centro visual de la caja blanca.
+            # En el diseño tipo "polaroid", la caja suele estar centrada ligeramente arriba.
+            # H/2 - offset. Probemos offset de 40px hacia arriba desde el centro (antes 150).
+            qr_y = (H - qr_size) // 2 - 40
+            
+            bg.paste(qr_img, (qr_x, qr_y))
+            
+            # Configurar fuentes (más grandes para alta resolución)
+            draw = ImageDraw.Draw(bg)
+            try:
+                # Intentamos cargar Arial, si no default
+                font_event = ImageFont.truetype("arialbd.ttf", 55) # Aumentado
+                font_name = ImageFont.truetype("arial.ttf", 45)    # Aumentado
+            except:
+                font_event = ImageFont.load_default()
+                font_name = ImageFont.load_default()
+            
+            # Helper para centrar texto
+            def draw_centered(text, y, font, color=(0,0,0)):
+                try:
+                    w = draw.textlength(text, font=font)
+                except:
+                    w = draw.textbbox((0, 0), text, font=font)[2]
+                x = (W - w) // 2
+                draw.text((x, y), text, font=font, fill=color)
+                return 40 # altura linea aprox
+            
+            # Dibujar textos debajo del QR
+            # Ajustamos el margen superior del texto
+            text_y = qr_y + qr_size + 40
+            
+            # Evento (Negrita)
+            draw_centered(evento, text_y, font_event)
+            text_y += 70
+            
+            # Nombre (Normal)
+            draw_centered(nombre, text_y, font_name)
+            
+            out = io.BytesIO()
+            bg.save(out, format="PNG")
+            return out.getvalue()
+            
+        except Exception as e:
+            print(f"Error usando template: {e}")
+            # Fallback al modo normal si falla la imagen
+    
+    # --- MODO PROG (Fondo blanco) ---
     qr_size = 480
     qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
 
@@ -125,14 +193,21 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     # Medidas
     dummy = Image.new("RGB", (10, 10))
     ddraw = ImageDraw.Draw(dummy)
-    title_w, title_h = ddraw.textbbox((0, 0), title, font=font_title)[2:]
+    try:
+        title_w, title_h = ddraw.textbbox((0, 0), title, font=font_title)[2:]
+    except:
+        # Fallback para Pillows viejos
+        title_w, title_h = ddraw.textsize(title, font=font_title)
 
     wrapped_lines, text_block_h = [], 0
     for ln in lines:
         wlines = wrap_line(ln, font_text, max_text_width)
         wrapped_lines.append(wlines)
         for wln in wlines:
-            _, h = ddraw.textbbox((0, 0), wln, font=font_text)[2:]
+            try:
+                _, h = ddraw.textbbox((0, 0), wln, font=font_text)[2:]
+            except:
+                _, h = ddraw.textsize(wln, font=font_text)
             text_block_h += h + line_spacing
     if text_block_h > 0:
         text_block_h -= line_spacing
@@ -145,7 +220,11 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     try:
         title_len = draw.textlength(title, font=font_title)
     except:
-        title_len = ddraw.textbbox((0, 0), title, font=font_title)[2]
+        try:
+            title_len = ddraw.textbbox((0, 0), title, font=font_title)[2]
+        except:
+             title_len, _ = ddraw.textsize(title, font=font_title)
+             
     title_x = int((canvas_width - title_len) // 2)
     y = margin
     draw.text((title_x, y), title, fill="black", font=font_title)
@@ -160,7 +239,10 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     for wlines in wrapped_lines:
         for wln in wlines:
             draw.text((margin, y), wln, fill="black", font=font_text)
-            _, h = ddraw.textbbox((0, 0), wln, font=font_text)[2:]
+            try:
+                _, h = ddraw.textbbox((0, 0), wln, font=font_text)[2:]
+            except:
+                _, h = ddraw.textsize(wln, font=font_text)
             y += h + line_spacing
 
     out = io.BytesIO()
