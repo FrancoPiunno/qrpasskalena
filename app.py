@@ -124,10 +124,11 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
             draw = ImageDraw.Draw(bg)
             try:
                 # Intentamos cargar Arial, si no default
-                font_event = ImageFont.truetype("arialbd.ttf", 55) # Aumentado
-                font_name = ImageFont.truetype("arial.ttf", 45)    # Aumentado
+                # Aumentamos aún más: Titulo (Telefono) 65pt, Nombre 55pt
+                font_phone = ImageFont.truetype("arialbd.ttf", 65) 
+                font_name = ImageFont.truetype("arial.ttf", 55)    
             except:
-                font_event = ImageFont.load_default()
+                font_phone = ImageFont.load_default()
                 font_name = ImageFont.load_default()
             
             # Helper para centrar texto
@@ -138,17 +139,17 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
                     w = draw.textbbox((0, 0), text, font=font)[2]
                 x = (W - w) // 2
                 draw.text((x, y), text, font=font, fill=color)
-                return 40 # altura linea aprox
+                return 60 # altura linea aprox (aumentada)
             
             # Dibujar textos debajo del QR
             # Ajustamos el margen superior del texto
             text_y = qr_y + qr_size + 40
             
-            # Evento (Negrita)
-            draw_centered(evento, text_y, font_event)
-            text_y += 70
+            # 1) Teléfono (en vez de Evento) - Negrita grande
+            draw_centered(telefono, text_y, font_phone)
+            text_y += 80 # Espacio extra
             
-            # Nombre (Normal)
+            # 2) Nombre (Normal grande)
             draw_centered(nombre, text_y, font_name)
             
             out = io.BytesIO()

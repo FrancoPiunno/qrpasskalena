@@ -18,7 +18,8 @@ body {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  overflow: hidden;
+  overflow-y: auto; /* Enable vertical scroll */
+  min-height: 100vh; /* Allow expansion */
 }
 
 @keyframes gradient {
@@ -766,6 +767,11 @@ form {
   justify-content: center;
   align-items: center;
   background-color: #ffffff;
+  
+  /* Force disable animations */
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
 }
 
 .share a svg {
