@@ -169,8 +169,8 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     margin = 24
     line_spacing = 10
     try:
-        font_title = ImageFont.truetype("arial.ttf", 28)
-        font_text  = ImageFont.truetype("arial.ttf", 24)
+        font_title = ImageFont.truetype("arial.ttf", 65)
+        font_text  = ImageFont.truetype("arial.ttf", 55)
     except:
         font_title = ImageFont.load_default()
         font_text  = ImageFont.load_default()
