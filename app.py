@@ -125,6 +125,7 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
             try:
                 # Intentamos cargar Arial, si no default
                 # Aumentamos aún más: Titulo (Telefono) 65pt, Nombre 55pt
+                # Font sizes adjusted for high-res template
                 font_phone = ImageFont.truetype("arialbd.ttf", 65) 
                 font_name = ImageFont.truetype("arial.ttf", 55)    
             except:
