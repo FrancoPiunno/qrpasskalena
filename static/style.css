@@ -268,7 +268,6 @@ body {
 .btn-delete:hover {
   background: #ff4d4d;
   color: white;
-  transform: rotate(90deg);
   box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
 }
 
