@@ -124,12 +124,14 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
             # Configurar fuentes (más grandes para alta resolución)
             draw = ImageDraw.Draw(bg)
             try:
-                # Intentamos cargar Arial, si no default
-                # Aumentamos aún más: Titulo (Telefono) 65pt, Nombre 55pt
-                # Font sizes adjusted for high-res template
-                font_phone = ImageFont.truetype("arialbd.ttf", 65) 
-                font_name = ImageFont.truetype("arial.ttf", 55)    
-            except:
+                # Load bundled fonts from static folder for Render compatibility
+                font_phone_path = os.path.join(app.root_path, 'static', 'arialbd.ttf')
+                font_name_path = os.path.join(app.root_path, 'static', 'arial.ttf')
+                
+                font_phone = ImageFont.truetype(font_phone_path, 65) 
+                font_name = ImageFont.truetype(font_name_path, 55)    
+            except Exception as e:
+                print(f"Error loading fonts: {e}")
                 font_phone = ImageFont.load_default()
                 font_name = ImageFont.load_default()
             
@@ -170,9 +172,12 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     margin = 24
     line_spacing = 10
     try:
-        font_title = ImageFont.truetype("arial.ttf", 65)
-        font_text  = ImageFont.truetype("arial.ttf", 55)
-    except:
+        # Load bundled fonts from static folder for Render compatibility
+        font_path = os.path.join(app.root_path, 'static', 'arial.ttf')
+        font_title = ImageFont.truetype(font_path, 65)
+        font_text  = ImageFont.truetype(font_path, 55)
+    except Exception as e:
+        print(f"Error loading fonts (PROG mode): {e}")
         font_title = ImageFont.load_default()
         font_text  = ImageFont.load_default()
 
