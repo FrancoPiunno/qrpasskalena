@@ -19,6 +19,7 @@ from google.cloud import firestore as gcf_firestore  # para @transactional
 
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
+from fpdf import FPDF
 
 # =========================
 # App & Config
@@ -392,6 +393,68 @@ def lista_entradas():
 def eliminar_entrada(entrada_id):
     db.collection("entradas").document(entrada_id).delete()
     return redirect(url_for("lista_entradas"))
+
+@app.route("/descargar_lista_pdf")
+@login_required
+def descargar_lista_pdf():
+    # 1. Obtener entradas
+    docs = db.collection("entradas").stream()
+    entradas = [doc.to_dict() for doc in docs]
+    # Ordenar por fecha o evento
+    entradas.sort(key=lambda e: e.get("evento", "").lower())
+
+    # 2. Configurar PDF
+    pdf = FPDF()
+    pdf.add_page()
+    
+    # Intentar usar Arial si está disponible, sino default
+    font_path = os.path.join(app.root_path, 'static', 'arial.ttf')
+    if os.path.exists(font_path):
+        # FPDF requiere registrar fuentes TTF para unicode
+        # Nota: FPDF 1.7.2 a veces es quisquilloso con unicode. 
+        # Usaremos font standard (Arial/Helvetica) y codificación latin-1 para compatibilidad.
+        # Si quisieramos full unicode necesitariamos ttf que soporte todo y add_font.
+        # Para simplificar y evitar errores de ruta en Render, usaremos la built-in Arial.
+        pass
+    
+    pdf.set_font("Arial", size=12)
+    
+    # Título
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Lista de Entradas Generadas", ln=True, align="C")
+    pdf.ln(10)
+    
+    # Encabezados
+    pdf.set_font("Arial", "B", 12)
+    # Anchos: Evento=60, Nombre=70, Telefono=60
+    pdf.cell(60, 10, "Evento", 1)
+    pdf.cell(70, 10, "Nombre", 1)
+    pdf.cell(60, 10, u"Teléfono".encode('latin-1').decode('latin-1'), 1)
+    pdf.ln()
+    
+    # Datos
+    pdf.set_font("Arial", size=12)
+    for ent in entradas:
+        evento = ent.get("evento", "") or ""
+        nombre = ent.get("nombre", "") or ""
+        telefono = ent.get("telefono", "") or ""
+        
+        # Sanitize / Encode para FPDF (Latin-1 standard)
+        # FPDF 1.7 no soporta UTF-8 directo. Hay que encode/decode a latin-1 y reemplazar caracteres raros.
+        def clean(txt):
+            return txt.encode('latin-1', 'replace').decode('latin-1')
+
+        pdf.cell(60, 10, clean(evento)[:25], 1) # Trim si es muy largo
+        pdf.cell(70, 10, clean(nombre)[:30], 1)
+        pdf.cell(60, 10, clean(telefono), 1)
+        pdf.ln()
+
+    # Salida
+    response = make_response(pdf.output(dest='S').encode('latin-1'))
+    response.headers['Content-Type'] = 'application/pdf'
+    filename = f"lista_entradas_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+    response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+    return response
 
 @app.route("/descargar/<id>")
 @login_required
