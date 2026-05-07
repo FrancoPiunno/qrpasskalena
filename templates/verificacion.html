@@ -40,12 +40,12 @@
     
 
     {% if estado == 'valido' and entrada_id %}
-      <form method="POST" action="{{ url_for('verificar_usar') }}" class="mt-3">
+      <form method="POST" action="{{ url_for('main.verificar_usar') }}" class="mt-3">
         <input type="hidden" name="entrada_id" value="{{ entrada_id }}">
         <button class="btnver">Marcar como usada</button>
       </form>
     {% endif %}
-    <a href="{{ url_for('index') }}">Volver al menú</a>
+    <a href="{{ url_for('main.index') }}">Volver al menú</a>
   </div>
 
 </body>

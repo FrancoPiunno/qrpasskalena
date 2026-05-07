@@ -10,10 +10,8 @@ body {
   padding: 0;
   height: 100vh;
   width: 100vw;
-  background: linear-gradient(-45deg, #4a0000, #8b0000, #580000, #2e0000);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
-  color: #000;
+  background: #161616;
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -166,8 +164,8 @@ body {
 
 /* Hero Button (Create) */
 .btn-create {
-  background: #ffffff;
-  color: #8b0000; /* Dark red text */
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff; /* White text */
   border: 1px solid #ffffff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
@@ -175,7 +173,7 @@ body {
 .btn-create:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Secondary Button (Entries) */
@@ -556,8 +554,8 @@ p {
 
 .gencon button {
   margin-right: 0.7rem;
-  background: #ffffff;
-  color: rgb(0, 0, 0);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
   font-size: 1rem;
   padding: 0.5rem;
   border: 1px solid #ffffff;
@@ -859,4 +857,55 @@ form {
   color: rgb(0, 0, 0);
   padding: 1rem;
   border-radius: 100px;
+}
+/* Filter Tabs */
+.filter-tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.filter-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.filter-tab:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.filter-tab.active {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.filter-tab .badge-count {
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 50px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+}
+
+.filter-tab.active .badge-count {
+    background-color: #000000;
+    color: #ffffff;
 }

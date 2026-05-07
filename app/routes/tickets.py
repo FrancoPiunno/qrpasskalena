@@ -1,0 +1,105 @@
+from flask import Blueprint, request, render_template, redirect, url_for, send_file
+import uuid
+import base64
+import io
+from datetime import datetime
+from collections import Counter
+
+from app.firebase import db
+from app.utils.decorators import login_required
+from app.utils.helpers import make_verification_url, safe_filename
+from app.utils.qr_generator import build_qr_image_with_text
+from app.utils.pdf_builder import descargar_lista_pdf_logic
+
+tickets_bp = Blueprint('tickets', __name__)
+
+@tickets_bp.route("/registrar_entrada", methods=["GET", "POST"])
+@login_required
+def registrar_entrada():
+    eventos_docs = db.collection("eventos").stream()
+    eventos = [doc.to_dict() for doc in eventos_docs]
+
+    if request.method == "POST":
+        evento = request.form["evento"]
+        nombre = request.form["nombre"]
+        telefono = request.form["telefono"]
+        qr_id = str(uuid.uuid4())
+
+        data = {
+            "evento": evento,
+            "nombre": nombre,
+            "telefono": telefono,
+            "id": qr_id,
+            "estado": "valido",
+            "creada_en": datetime.utcnow().isoformat() + "Z",
+        }
+        db.collection("entradas").document(qr_id).set(data)
+
+        qr_url = make_verification_url(qr_id)
+        png_bytes = build_qr_image_with_text(qr_url, nombre=nombre, evento=evento, telefono=telefono)
+        qr_base64 = base64.b64encode(png_bytes).decode("utf-8")
+
+        return render_template(
+            "registrar_entrada.html",
+            qr_base64=qr_base64,
+            qr_id=qr_id,
+            evento=evento,
+            nombre=nombre,
+            telefono=telefono,
+            eventos=eventos,
+            verify_url=qr_url
+        )
+
+    return render_template("registrar_entrada.html", eventos=eventos)
+
+@tickets_bp.route("/lista")
+@login_required
+def lista_entradas():
+    docs = db.collection("entradas").stream()
+    entradas = [doc.to_dict() for doc in docs]
+    entradas.sort(key=lambda e: e.get("creada_en", ""), reverse=True)
+    conteo_eventos = Counter(
+        (e.get("evento") or "(Sin evento)") for e in entradas
+    )
+    return render_template("lista.html", entradas=entradas, conteo_eventos=conteo_eventos)
+
+@tickets_bp.route("/eliminar/<entrada_id>", methods=["POST"])
+@login_required
+def eliminar_entrada(entrada_id):
+    db.collection("entradas").document(entrada_id).delete()
+    return redirect(url_for("tickets.lista_entradas"))
+
+@tickets_bp.route("/descargar_lista_pdf")
+@login_required
+def descargar_lista_pdf():
+    return descargar_lista_pdf_logic()
+
+@tickets_bp.route("/descargar/<id>")
+@login_required
+def descargar_qr(id):
+    snap = db.collection("entradas").document(id).get()
+    if not snap.exists:
+        return "Entrada no encontrada", 404
+    e = snap.to_dict()
+
+    nombre = e.get("nombre", "")
+    evento = e.get("evento", "")
+
+    qr_url = make_verification_url(id)
+    png_bytes = build_qr_image_with_text(
+        qr_url,
+        nombre=nombre,
+        evento=evento,
+        telefono=e.get("telefono", "")
+    )
+
+    fname = f"{safe_filename(evento)}_{safe_filename(nombre)}.png"
+
+    buf = io.BytesIO(png_bytes)
+    buf.seek(0)
+    return send_file(
+        buf,
+        mimetype="image/png",
+        as_attachment=True,
+        download_name=fname
+    )
