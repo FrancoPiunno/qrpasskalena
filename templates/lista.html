@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=7">
     <link rel="shortcut icon" type="x-icon" href="{{ url_for('static', filename='webicon.png') }}">
-    <style>@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');</style>
+    <!-- Fuentes gestionadas en style.css -->
 </head>
 <body>
     
@@ -16,91 +16,133 @@
         
         <div class="events-container">
             
-            <!-- Encabezado Glass -->
-            <div class="events-header">
-                <div class="search-box">
-                    <input type="text" placeholder="Buscar entrada..." id="searchInput" onkeyup="filterTable()">
-                </div>
-                
-                <div class="action-buttons">
-                    <a href="{{ url_for('tickets.registrar_entrada') }}" class="btn-create">Generar</a>
-                    <a href="{{ url_for('tickets.descargar_lista_pdf') }}" class="btn-secondary" style="background:#e74c3c; border-color:#c0392b;">PDF</a>
-                    <a href="{{ url_for('events.lista_eventos') }}" class="btn-secondary">Eventos</a>
+            <!-- Título de la Página -->
+            <div class="page-header">
+                <h1 class="page-title"><span class="desktop-text">Lista de </span>Entradas</h1>
+                <div class="mobile-search-icon" onclick="toggleSearch(event)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </div>
             </div>
 
-            <!-- Filtros Rápidos (Chips) -->
+            <!-- Filtros y Acciones -->
             <div class="filter-tabs-container">
-                <!-- Tab "Todas" -->
-                <button class="filter-tab active" onclick="setFilter('', this)">
-                    Todas <span class="badge-count">{{ entradas|length }}</span>
-                </button>
-
-                <!-- Tabs por Estado -->
-                {% set validas = entradas | selectattr('estado', 'equalto', 'valido') | list | length %}
-                {% set usadas = entradas | selectattr('estado', 'equalto', 'usado') | list | length %}
-                
-                <button class="filter-tab" onclick="setFilter('valido', this)">
-                    Válidas <span class="badge-count">{{ validas }}</span>
-                </button>
-                <button class="filter-tab" onclick="setFilter('usado', this)">
-                    Usadas <span class="badge-count">{{ usadas }}</span>
-                </button>
-
-                <!-- Tabs por Evento -->
-                {% if conteo_eventos and conteo_eventos|length > 0 %}
-                    {% for evento, cantidad in conteo_eventos.items() %}
-                    <button class="filter-tab" onclick="setFilter('{{ evento|e }}', this)">
-                        {{ evento }} <span class="badge-count">{{ cantidad }}</span>
+                <!-- Grupo de Filtros de Estado -->
+                <div class="status-group">
+                    <button class="filter-tab active" onclick="setFilter('', this)">
+                        Todas <span class="badge-count">{{ entradas|length }}</span>
                     </button>
-                    {% endfor %}
-                {% endif %}
+                    {% set validas = entradas | selectattr('estado', 'equalto', 'valido') | list | length %}
+                    {% set usadas = entradas | selectattr('estado', 'equalto', 'usado') | list | length %}
+                    <button class="filter-tab" onclick="setFilter('valido', this)">
+                        Valida <span class="badge-count">{{ validas }}</span>
+                    </button>
+                    <button class="filter-tab" onclick="setFilter('usado', this)">
+                        Usada <span class="badge-count">{{ usadas }}</span>
+                    </button>
+                </div>
+
+                <!-- Grupo de Acciones -->
+                <div class="action-group">
+                    <!-- Buscador en Burbuja (Desktop) -->
+                    <div class="filter-tab search-trigger desktop-only" id="searchTrigger" onclick="openSearchModal()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    
+                    <!-- Input oculto para móvil -->
+                    <div class="mobile-search-input-wrapper" id="mobileSearchWrapper">
+                        <input type="text" id="searchInputMobile" placeholder="Buscar..." onkeyup="filterTableMobile()" class="mobile-only">
+                    </div>
+
+                    <!-- Botón Descargar Lista (Desktop) -->
+                    <a href="{{ url_for('tickets.descargar_lista_pdf') }}" class="filter-tab action-btn desktop-only" title="Descargar Lista">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span class="btn-text">Descargar</span>
+                    </a>
+
+                    <!-- Botón Crear Entrada (Desktop) -->
+                    <a href="{{ url_for('tickets.registrar_entrada') }}" class="filter-tab btn-white desktop-only" style="text-decoration: none;">
+                        <span>+ Crear entrada</span>
+                    </a>
+                </div>
             </div>
 
-            <!-- Tabla de Datos -->
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Evento</th>
-                            <th>Nombre</th>
-                            <th>Teléfono</th>
-                            <th>Estado</th>
-                            <th class="text-center">QR</th>
-                            <th class="text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entrada in entradas %}
-                        <tr>
-                            <td data-label="Evento">{{ entrada.evento }}</td>
-                            <td data-label="Nombre">{{ entrada.nombre }}</td>    
-                            <td data-label="Teléfono">{{ entrada.telefono }}</td>                
-                            <td data-label="Estado">
-                                <span class="badge {{ 'bg-success' if entrada.estado == 'usado' else 'bg-warning text-dark' }}">
-                                    {{ entrada.estado|title }}
-                                </span>
-                            </td>
-                            <td data-label="QR" class="text-center">
-                                <a href="{{ url_for('tickets.descargar_qr', id=entrada.id)}}" class="btn-delete" style="background: rgba(255,255,255,0.2); color:white; width:auto; height:30px; padding:0 10px; border-radius:15px; font-size:0.8rem; text-decoration:none;">
-                                    Descargar
-                                </a>
-                            </td>
-                            <td data-label="Acción" class="text-center">
-                                <form method="POST" action="{{ url_for('tickets.eliminar_entrada', entrada_id=entrada.id) }}" onsubmit="return confirm('¿Eliminar esta entrada?')">
-                                    <button type="submit" class="btn-delete">x</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        {% if not entradas %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-5">No hay entradas generadas todavía.</td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+            <!-- Modal de Búsqueda (Desktop) -->
+            <div id="searchModal" class="search-bubble-modal">
+                <div class="search-bubble-content">
+                    <input type="text" id="searchInput" placeholder="¿A quién buscas?">
+                    <button onclick="executeSearch()" class="btn-search-confirm">Buscar</button>
+                    <button onclick="closeSearchModal()" class="btn-search-close">×</button>
+                </div>
             </div>
+
+            <!-- Botón Descargar Lista (Solo Móvil) -->
+            <a href="{{ url_for('tickets.descargar_lista_pdf') }}" class="filter-tab mobile-download-btn mobile-only" style="text-decoration: none;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Descargar Lista</span>
+            </a>
+
+            <!-- Encabezado de Tabla (Solo PC) -->
+            <div class="table-header-grid">
+                <div>Nombre</div>
+                <div>Teléfono</div>
+                <div>Evento</div>
+                <div>Estado</div>
+                <div>Acciones</div>
+            </div>
+
+            <!-- Vista de Cards / Lista Híbrida -->
+            <div class="tickets-grid">
+                <!-- Card de Crear Entrada (Solo Móvil) -->
+                <a href="{{ url_for('tickets.registrar_entrada') }}" class="ticket-card create-ticket-card mobile-only" style="text-decoration: none;">
+                    <div class="col-nombre">
+                        <h3>Crear nueva entrada</h3>
+                    </div>
+                </a>
+
+                {% for entrada in entradas %}
+                <div class="ticket-card {{ 'usada' if entrada.estado == 'usado' else 'valida' }}" data-status="{{ entrada.estado }}">
+                    <!-- 1. Nombre -->
+                    <div class="col-nombre">
+                        <h3>{{ entrada.nombre }}</h3>
+                    </div>
+
+                    <!-- 2. Teléfono -->
+                    <div class="col-telefono">
+                        <span>{{ entrada.telefono }}</span>
+                    </div>
+
+                    <!-- 3. Evento -->
+                    <div class="col-evento">
+                        <span class="event-label">{{ entrada.evento }}</span>
+                    </div>
+
+                    <!-- 4. Estado -->
+                    <div class="col-estado">
+                        <span class="status-pill">{{ 'Usada' if entrada.estado == 'usado' else 'Válida' }}</span>
+                    </div>
+                    
+                    <!-- 5 & 6. Acciones -->
+                    <div class="col-acciones">
+                        <!-- Icono de descargar -->
+                        <a href="{{ url_for('tickets.descargar_qr', id=entrada.id)}}" class="btn-icon" title="Descargar QR">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </a>
+                        <!-- Botón de eliminar -->
+                        <form method="POST" action="{{ url_for('tickets.eliminar_entrada', entrada_id=entrada.id) }}" onsubmit="return confirm('¿Eliminar esta entrada?')">
+                            <button type="submit" class="btn-icon btn-delete" title="Eliminar">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if not entradas %}
+            <div class="text-center text-muted py-5">
+                <p>No hay entradas generadas todavía.</p>
+            </div>
+            {% endif %}
 
         </div>
 
@@ -114,48 +156,104 @@
     </div>
 
     <script>
-        function filterTable() {
-            const input = document.getElementById('searchInput');
-            const filter = input.value.toLowerCase();
-            const table = document.querySelector('table');
-            const rows = table.getElementsByTagName('tr');
-            for (let i = 1; i < rows.length; i++) {
-                const cells = rows[i].getElementsByTagName('td');
-                let found = false;
-                for (let j = 0; j < cells.length; j++) {
-                    if (cells[j].textContent.toLowerCase().includes(filter)) {
-                        found = true;
-                        break;
-                    }
+        let currentStatusFilter = '';
+
+        function openSearchModal() {
+            const modal = document.getElementById('searchModal');
+            modal.classList.add('active');
+            document.getElementById('searchInput').focus();
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').classList.remove('active');
+        }
+
+        function executeSearch() {
+            // Cuando buscamos por texto, limpiamos el filtro de estado para no confundir
+            currentStatusFilter = '';
+            const tabs = document.querySelectorAll('.status-group .filter-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabs[0].classList.add('active'); // Volver a 'Todas'
+
+            filterTable();
+            closeSearchModal();
+        }
+
+        function toggleSearch(event) {
+            if (window.innerWidth <= 768) {
+                const wrapper = document.getElementById('mobileSearchWrapper');
+                const input = document.getElementById('searchInputMobile');
+                wrapper.classList.toggle('active');
+                if (wrapper.classList.contains('active')) {
+                    input.focus();
                 }
-                rows[i].style.display = found ? '' : 'none';
+            } else {
+                openSearchModal();
             }
+        }
+
+        function filterTable() {
+            const desktopSearch = document.getElementById('searchInput').value.toLowerCase();
+            const mobileSearch = document.getElementById('searchInputMobile').value.toLowerCase();
+            const searchFilter = desktopSearch || mobileSearch;
+            
+            const dataCards = document.querySelectorAll('.ticket-card[data-status]');
+            const createCard = document.querySelector('.create-ticket-card');
+
+            // 1. Manejo de la card de creación
+            if (createCard) {
+                createCard.style.display = (searchFilter === '' && currentStatusFilter === '') ? '' : 'none';
+            }
+            
+            // 2. Filtrado de registros
+            dataCards.forEach(card => {
+                const status = (card.getAttribute('data-status') || '').toLowerCase();
+                const text = card.textContent.toLowerCase();
+                
+                let matchesStatus = (currentStatusFilter === '' || status === currentStatusFilter);
+                let matchesSearch = (searchFilter === '' || text.includes(searchFilter));
+
+                if (matchesStatus && matchesSearch) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function filterTableMobile() {
+            filterTable();
         }
 
         function setFilter(filterValue, btnElement) {
-            // Update search box
-            document.getElementById('searchInput').value = filterValue;
+            // Al filtrar por estado, limpiamos la búsqueda de texto
+            currentStatusFilter = filterValue;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchInputMobile').value = '';
             
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.filter-tab');
+            // Actualizar UI de los botones
+            const tabs = document.querySelectorAll('.status-group .filter-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             
-            // Add active class to clicked tab
             if (btnElement) {
                 btnElement.classList.add('active');
-            } else if (filterValue === '') {
-                // If filtering by nothing via the search box typing, we could theoretically set "Todas" active
-                // But this function is usually called by clicking tabs
             }
 
             filterTable();
         }
 
-        // Add event listener for manual typing to remove active tab if it doesn't match
-        document.getElementById('searchInput').addEventListener('input', function() {
-            const tabs = document.querySelectorAll('.filter-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            filterTable();
+        // Detectar Enter en el buscador de escritorio
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                executeSearch();
+            }
+        });
+
+        // Detectar Escape para cerrar el modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSearchModal();
+            }
         });
     </script>
 </body>
