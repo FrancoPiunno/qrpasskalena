@@ -20,4 +20,13 @@ def create_app():
     app.register_blueprint(tickets_bp)
     app.register_blueprint(main_bp)
 
+    # Forzar recarga de CSS y assets eliminando el caché del navegador
+    @app.after_request
+    def add_header(response):
+        if app.config.get('DEBUG'):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
     return app

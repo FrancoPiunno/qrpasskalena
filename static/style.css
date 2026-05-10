@@ -1445,6 +1445,26 @@ form {
     border: none;
 }
 
+.btn-search-close {
+    background: none !important;
+    border: none !important;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 5px;
+    outline: none !important;
+    appearance: none !important;
+    transition: color 0.3s ease;
+}
+
+.btn-search-close:hover {
+    color: #fff;
+}
+
 /* --- RESPONSIVE BAR REORDER --- */
 .filter-tabs-container {
     display: flex;
@@ -1560,7 +1580,7 @@ body, button, input, select, textarea, .filter-tab, .page-title, .ticket-card h3
 
 @media (max-width: 768px) {
     .page-title {
-        font-size: 2.8rem
+        font-size: 2.8rem;
     }
     
     .desktop-text {
@@ -1573,7 +1593,8 @@ body, button, input, select, textarea, .filter-tab, .page-title, .ticket-card h3
         cursor: pointer;
         padding: 10px;
     }
-    
+}
+
 /* Visibilidad condicional definitiva */
 .mobile-only { display: none !important; }
 .desktop-only { display: flex !important; }
@@ -1597,7 +1618,7 @@ body, button, input, select, textarea, .filter-tab, .page-title, .ticket-card h3
     justify-content: center !important;
     text-align: center;
     padding: 1.8rem !important;
-    margin-bottom: 0.8rem; /* Reducido de 1.5rem */
+    margin-bottom: 0.8rem;
     border-radius: 20px !important;
     animation: grayGradient 4s ease-in-out infinite;
     transition: all 0.3s ease;
@@ -1613,15 +1634,15 @@ body, button, input, select, textarea, .filter-tab, .page-title, .ticket-card h3
 /* Botón descargar móvil full-width */
 .mobile-download-btn {
     width: 100%;
-    margin-bottom: 1rem; /* Reducido de 2rem */
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     justify-content: center !important;
     gap: 1rem !important;
     background: rgba(255, 255, 255, 0.05) !important;
-    border: none !important; /* Sin borde */
-    padding: 1rem !important; /* Menos alto */
-    border-radius: 50px !important; /* Rounded full */
+    border: none !important;
+    padding: 1rem !important;
+    border-radius: 50px !important;
     color: #fff !important;
     font-weight: 500 !important;
     transition: all 0.3s ease;
@@ -1635,4 +1656,80 @@ body, button, input, select, textarea, .filter-tab, .page-title, .ticket-card h3
 /* Specific button styles */
 .action-btn {
     text-decoration: none;
+}
+
+/* Premium Inputs */
+.premium-input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    height: 50px !important;
+    padding: 0 1.2rem !important;
+    transition: all 0.3s ease;
+}
+
+.premium-input:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+select.premium-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2em;
+}
+/* Premium Form Card - Para pantallas de registro y edición */
+.premium-form-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 450px;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1.5rem;
+    margin: 0 auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.premium-form-card .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .premium-form-card {
+        padding: 2rem 1.5rem;
+        max-width: 100%;
+        border-radius: 24px;
+    }
+}
+/* Estilo de Botón Válida (Estética Premium Verde) */
+.btn-valida {
+    border: 2px solid #a8e063 !important;
+    background: linear-gradient(135deg, #161616 0%, rgba(168, 224, 99, 0.15) 100%) !important;
+    color: white !important;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 20px rgba(168, 224, 99, 0.05);
+}
+
+.btn-valida:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #1a1a1a 0%, rgba(168, 224, 99, 0.25) 100%) !important;
+    box-shadow: 0 0 30px rgba(168, 224, 99, 0.15);
+    border-color: #bef08d !important;
+}
+
+.btn-valida:active {
+    transform: scale(0.98);
 }

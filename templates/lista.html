@@ -156,104 +156,92 @@
     </div>
 
     <script>
-        let currentStatusFilter = '';
+        // Sistema de filtrado blindado
+        window.activeStatus = '';
+
+        function applyFilters() {
+            const searchInput = document.getElementById('searchInput');
+            const mobileInput = document.getElementById('searchInputMobile');
+            if (!searchInput || !mobileInput) return;
+
+            const term = (searchInput.value || mobileInput.value || "").toLowerCase().trim();
+            const cards = document.querySelectorAll('.ticket-card[data-status]');
+            const createCard = document.querySelector('.create-ticket-card');
+
+            console.log('Filtrando por:', term, 'Estado:', window.activeStatus);
+
+            cards.forEach(card => {
+                const status = (card.getAttribute('data-status') || "").toLowerCase();
+                const text = card.innerText.toLowerCase();
+
+                const matchesStatus = (window.activeStatus === '' || status === window.activeStatus);
+                const matchesSearch = (term === '' || text.includes(term));
+
+                card.style.setProperty('display', (matchesStatus && matchesSearch) ? '' : 'none', 'important');
+            });
+
+            if (createCard) {
+                createCard.style.setProperty('display', (term === '' && window.activeStatus === '') ? '' : 'none', 'important');
+            }
+        }
+
+        function setFilter(status, btn) {
+            window.activeStatus = status;
+            
+            // Limpiar inputs
+            const s1 = document.getElementById('searchInput');
+            const s2 = document.getElementById('searchInputMobile');
+            if (s1) s1.value = '';
+            if (s2) s2.value = '';
+
+            // Actualizar botones
+            document.querySelectorAll('.status-group .filter-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            applyFilters();
+        }
 
         function openSearchModal() {
             const modal = document.getElementById('searchModal');
-            modal.classList.add('active');
-            document.getElementById('searchInput').focus();
+            if (modal) {
+                modal.classList.add('active');
+                const input = document.getElementById('searchInput');
+                if (input) setTimeout(() => input.focus(), 100);
+            }
         }
 
         function closeSearchModal() {
-            document.getElementById('searchModal').classList.remove('active');
+            const modal = document.getElementById('searchModal');
+            if (modal) modal.classList.remove('active');
         }
 
         function executeSearch() {
-            // Cuando buscamos por texto, limpiamos el filtro de estado para no confundir
-            currentStatusFilter = '';
-            const tabs = document.querySelectorAll('.status-group .filter-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            tabs[0].classList.add('active'); // Volver a 'Todas'
-
-            filterTable();
             closeSearchModal();
+            applyFilters();
         }
 
         function toggleSearch(event) {
             if (window.innerWidth <= 768) {
                 const wrapper = document.getElementById('mobileSearchWrapper');
-                const input = document.getElementById('searchInputMobile');
-                wrapper.classList.toggle('active');
-                if (wrapper.classList.contains('active')) {
-                    input.focus();
+                if (wrapper) {
+                    wrapper.classList.toggle('active');
+                    const input = document.getElementById('searchInputMobile');
+                    if (input && wrapper.classList.contains('active')) input.focus();
                 }
             } else {
                 openSearchModal();
             }
         }
 
-        function filterTable() {
-            const desktopSearch = document.getElementById('searchInput').value.toLowerCase();
-            const mobileSearch = document.getElementById('searchInputMobile').value.toLowerCase();
-            const searchFilter = desktopSearch || mobileSearch;
-            
-            const dataCards = document.querySelectorAll('.ticket-card[data-status]');
-            const createCard = document.querySelector('.create-ticket-card');
+        document.addEventListener('DOMContentLoaded', () => {
+            const i1 = document.getElementById('searchInput');
+            const i2 = document.getElementById('searchInputMobile');
+            if (i1) i1.addEventListener('input', applyFilters);
+            if (i2) i2.addEventListener('input', applyFilters);
 
-            // 1. Manejo de la card de creación
-            if (createCard) {
-                createCard.style.display = (searchFilter === '' && currentStatusFilter === '') ? '' : 'none';
-            }
-            
-            // 2. Filtrado de registros
-            dataCards.forEach(card => {
-                const status = (card.getAttribute('data-status') || '').toLowerCase();
-                const text = card.textContent.toLowerCase();
-                
-                let matchesStatus = (currentStatusFilter === '' || status === currentStatusFilter);
-                let matchesSearch = (searchFilter === '' || text.includes(searchFilter));
-
-                if (matchesStatus && matchesSearch) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeSearchModal();
             });
-        }
-
-        function filterTableMobile() {
-            filterTable();
-        }
-
-        function setFilter(filterValue, btnElement) {
-            // Al filtrar por estado, limpiamos la búsqueda de texto
-            currentStatusFilter = filterValue;
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchInputMobile').value = '';
-            
-            // Actualizar UI de los botones
-            const tabs = document.querySelectorAll('.status-group .filter-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            if (btnElement) {
-                btnElement.classList.add('active');
-            }
-
-            filterTable();
-        }
-
-        // Detectar Enter en el buscador de escritorio
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                executeSearch();
-            }
-        });
-
-        // Detectar Escape para cerrar el modal
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeSearchModal();
-            }
         });
     </script>
 </body>
