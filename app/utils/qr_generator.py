@@ -7,7 +7,7 @@ from flask import current_app
 
 def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: str) -> bytes:
     qr_img = qrcode.make(qr_url).convert("RGB")
-    template_path = os.path.join(current_app.static_folder, 'ticket_template.png')
+    template_path = os.path.join(current_app.static_folder, 'ticket.jpg')
     
     if os.path.exists(template_path):
         try:
