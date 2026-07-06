@@ -40,7 +40,7 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
                 return 60
             
             if numero is not None:
-                draw_centered(str(numero), qr_y - 100, font_phone)
+                draw_centered(str(numero), qr_y - 60, font_phone)
             
             text_y = qr_y + qr_size + 40
             draw_centered(telefono, text_y, font_phone)
