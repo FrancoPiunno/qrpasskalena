@@ -39,13 +39,13 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
                 draw.text((x, y), text, font=font, fill=color)
                 return 60
             
+            if numero is not None:
+                draw_centered(str(numero), qr_y - 100, font_phone)
+            
             text_y = qr_y + qr_size + 40
             draw_centered(telefono, text_y, font_phone)
             text_y += 80
             draw_centered(nombre, text_y, font_name)
-            if numero is not None:
-                text_y += 70
-                draw_centered(f"Entrada N° {numero}", text_y, font_name)
             
             out = io.BytesIO()
             bg.save(out, format="PNG")
@@ -69,7 +69,7 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     title = "QR Pass"
     lines = [f"Nombre: {nombre}", f"Evento: {evento}", f"Teléfono: {telefono}"]
     if numero is not None:
-        lines.append(f"Entrada N°: {numero}")
+        lines.append(f"Número: {numero}")
 
     def wrap_line(txt, font, width_px):
         max_chars = max(1, width_px // 12)
