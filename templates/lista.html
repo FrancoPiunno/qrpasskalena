@@ -53,6 +53,14 @@
                         <input type="text" id="searchInputMobile" placeholder="Buscar..." onkeyup="filterTableMobile()" class="mobile-only">
                     </div>
 
+                    <!-- Botón Asignar Números (Desktop) -->
+                    <form method="POST" action="{{ url_for('tickets.asignar_numeros') }}" style="display: inline;">
+                        <button type="submit" class="filter-tab action-btn desktop-only" title="Asignar Números a las Entradas" onclick="return confirm('¿Asignar números secuenciales automáticamente a todas las entradas?')">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4M3 10h3M4 16h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H3v-2"></path></svg>
+                            <span class="btn-text">Asignar Números</span>
+                        </button>
+                    </form>
+
                     <!-- Botón Descargar Lista (Desktop) -->
                     <a href="{{ url_for('tickets.descargar_lista_pdf') }}" class="filter-tab action-btn desktop-only" title="Descargar Lista">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -74,6 +82,14 @@
                     <button onclick="closeSearchModal()" class="btn-search-close">×</button>
                 </div>
             </div>
+
+            <!-- Botón Asignar Números (Solo Móvil) -->
+            <form method="POST" action="{{ url_for('tickets.asignar_numeros') }}" style="display: block; width: 100%; margin-bottom: 0.5rem;" class="mobile-only">
+                <button type="submit" class="filter-tab mobile-download-btn" style="width: 100%; justify-content: center; text-decoration: none;" onclick="return confirm('¿Asignar números secuenciales automáticamente a todas las entradas?')">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4M3 10h3M4 16h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H3v-2"></path></svg>
+                    <span>Asignar Números</span>
+                </button>
+            </form>
 
             <!-- Botón Descargar Lista (Solo Móvil) -->
             <a href="{{ url_for('tickets.descargar_lista_pdf') }}" class="filter-tab mobile-download-btn mobile-only" style="text-decoration: none;">
@@ -103,7 +119,12 @@
                 <div class="ticket-card {{ 'usada' if entrada.estado == 'usado' else 'valida' }}" data-status="{{ entrada.estado }}">
                     <!-- 1. Nombre -->
                     <div class="col-nombre">
-                        <h3>{{ entrada.nombre }}</h3>
+                        <h3>
+                            {% if entrada.numero %}
+                                <span class="ticket-number" title="Número de Entrada">N°{{ entrada.numero }}</span>
+                            {% endif %}
+                            {{ entrada.nombre }}
+                        </h3>
                     </div>
 
                     <!-- 2. Teléfono -->

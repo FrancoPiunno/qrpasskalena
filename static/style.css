@@ -960,6 +960,19 @@ form {
     margin-bottom: 2rem;
 }
 
+.ticket-card .ticket-number {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.ticket-card.valida .ticket-number {
+    color: #a8e063;
+}
+
+.ticket-card.usada .ticket-number {
+    color: #f1c40f;
+}
+
 .ticket-card .event-label {
     font-size: 1rem;
     color: rgba(255, 255, 255, 0.7);

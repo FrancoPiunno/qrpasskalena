@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import textwrap
 from flask import current_app
 
-def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: str) -> bytes:
+def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: str, numero: int = None) -> bytes:
     qr_img = qrcode.make(qr_url).convert("RGB")
     template_path = os.path.join(current_app.static_folder, 'ticketDDA.jpg')
     
@@ -43,6 +43,9 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
             draw_centered(telefono, text_y, font_phone)
             text_y += 80
             draw_centered(nombre, text_y, font_name)
+            if numero is not None:
+                text_y += 70
+                draw_centered(f"Entrada N° {numero}", text_y, font_name)
             
             out = io.BytesIO()
             bg.save(out, format="PNG")
@@ -65,6 +68,8 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
 
     title = "QR Pass"
     lines = [f"Nombre: {nombre}", f"Evento: {evento}", f"Teléfono: {telefono}"]
+    if numero is not None:
+        lines.append(f"Entrada N°: {numero}")
 
     def wrap_line(txt, font, width_px):
         max_chars = max(1, width_px // 12)
