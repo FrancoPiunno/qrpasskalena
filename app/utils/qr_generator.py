@@ -7,45 +7,45 @@ from flask import current_app
 
 def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: str, numero: int = None) -> bytes:
     qr_img = qrcode.make(qr_url).convert("RGB")
-    template_path = os.path.join(current_app.static_folder, 'ticketDDA.jpg')
+    template_path = os.path.join(current_app.static_folder, 'ticket.jpg')
     
     if os.path.exists(template_path):
         try:
             bg = Image.open(template_path).convert("RGB")
             W, H = bg.size
-            qr_size = 650
-            qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
-            qr_x = (W - qr_size) // 2
-            qr_y = (H - qr_size) // 2 - 40
-            bg.paste(qr_img, (qr_x, qr_y))
+            # Zona negra útil del diseño: termina en la línea divisoria (y≈862).
+            # Márgenes laterales alineados con el texto de la franja inferior.
+            area_top, area_bottom = 50, 830
+            margin_x = 108
+            
+            font_info = load_roboto_flex(56, weight=250)
+            font_name = load_roboto_flex(40, weight=250)
+            font_numero = load_roboto_flex(36, weight=250)
+            tracking_info = 10
+            tracking_name = 8
             
             draw = ImageDraw.Draw(bg)
-            try:
-                font_phone_path = os.path.join(current_app.static_folder, 'arialbd.ttf')
-                font_name_path = os.path.join(current_app.static_folder, 'arial.ttf')
-                font_phone = ImageFont.truetype(font_phone_path, 65) 
-                font_name = ImageFont.truetype(font_name_path, 55)    
-            except Exception as e:
-                print(f"Error loading fonts: {e}")
-                font_phone = ImageFont.load_default()
-                font_name = ImageFont.load_default()
+            max_w = W - margin_x * 2
+            nombre = fit_tracked(draw, (nombre or "").upper(), font_name, tracking_name, max_w)
             
-            def draw_centered(text, y, font, color=(0,0,0)):
-                try:
-                    w = draw.textlength(text, font=font)
-                except:
-                    w = draw.textbbox((0, 0), text, font=font)[2]
-                x = (W - w) // 2
-                draw.text((x, y), text, font=font, fill=color)
-                return 60
+            numero_txt = str(numero) if numero is not None else None
+            gap = 28
+            h_numero = text_height(font_numero) if numero_txt else 0
+            h_info = text_height(font_info)
+            h_name = text_height(font_name)
+            text_block = (h_numero + gap if numero_txt else 0) + gap + h_info + 18 + h_name
+            qr_size = min(max_w, area_bottom - area_top - text_block)
+            qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
             
-            if numero is not None:
-                draw_centered(str(numero), qr_y - 60, font_phone)
-            
-            text_y = qr_y + qr_size + 40
-            draw_centered(telefono, text_y, font_phone)
-            text_y += 80
-            draw_centered(nombre, text_y, font_name)
+            y = area_top
+            if numero_txt:
+                draw_tracked(draw, numero_txt, (W, y), font_numero, tracking_info)
+                y += h_numero + gap
+            bg.paste(qr_img, ((W - qr_size) // 2, y))
+            y += qr_size + gap
+            draw_tracked(draw, telefono or "", (W, y), font_info, tracking_info)
+            y += h_info + 18
+            draw_tracked(draw, nombre, (W, y), font_name, tracking_name)
             
             out = io.BytesIO()
             bg.save(out, format="PNG")
@@ -134,3 +134,46 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
     out = io.BytesIO()
     canvas.save(out, format="PNG")
     return out.getvalue()
+
+
+def load_roboto_flex(size, weight=250):
+    try:
+        font = ImageFont.truetype(os.path.join(current_app.static_folder, 'RobotoFlex.ttf'), size)
+        axes = {
+            b'Optical Size': min(144, max(8, size)),
+            b'Weight': weight,
+            b'Width': 100,
+        }
+        font.set_variation_by_axes([axes.get(a['name'], a['default']) for a in font.get_variation_axes()])
+        return font
+    except Exception as e:
+        print(f"Error loading Roboto Flex: {e}")
+        return ImageFont.truetype(os.path.join(current_app.static_folder, 'arial.ttf'), size)
+
+
+def text_height(font):
+    ascent, descent = font.getmetrics()
+    return ascent + descent
+
+
+def tracked_width(draw, text, font, tracking):
+    if not text:
+        return 0
+    return sum(draw.textlength(ch, font=font) for ch in text) + tracking * (len(text) - 1)
+
+
+def fit_tracked(draw, text, font, tracking, max_w):
+    if tracked_width(draw, text, font, tracking) <= max_w:
+        return text
+    while text and tracked_width(draw, text + "…", font, tracking) > max_w:
+        text = text[:-1]
+    return text.rstrip() + "…"
+
+
+def draw_tracked(draw, text, pos, font, tracking, color=(255, 255, 255)):
+    """Dibuja texto centrado horizontalmente en pos[0] (ancho) con letter spacing."""
+    W, y = pos
+    x = (W - tracked_width(draw, text, font, tracking)) / 2
+    for ch in text:
+        draw.text((x, y), ch, font=font, fill=color)
+        x += draw.textlength(ch, font=font) + tracking
