@@ -115,25 +115,6 @@ def eliminar_entrada(entrada_id):
     db.collection("entradas").document(entrada_id).delete()
     return redirect(url_for("tickets.lista_entradas"))
 
-# Borra todas las entradas de Firestore (pide confirmación escribiendo ELIMINAR)
-@tickets_bp.route("/eliminar_todas", methods=["POST"])
-@login_required
-def eliminar_todas_entradas():
-    if request.form.get("confirmacion") != "ELIMINAR":
-        return redirect(url_for("tickets.lista_entradas"))
-    batch = db.batch()
-    pendientes = 0
-    for doc in db.collection("entradas").stream():
-        batch.delete(doc.reference)
-        pendientes += 1
-        if pendientes == 400:
-            batch.commit()
-            batch = db.batch()
-            pendientes = 0
-    if pendientes:
-        batch.commit()
-    return redirect(url_for("tickets.lista_entradas"))
-
 @tickets_bp.route("/descargar_lista_pdf")
 @login_required
 def descargar_lista_pdf():
