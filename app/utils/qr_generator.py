@@ -18,9 +18,9 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
             area_top, area_bottom = 50, 830
             margin_x = 108
             
-            font_info = load_roboto_flex(56, weight=250)
-            font_name = load_roboto_flex(40, weight=250)
-            font_numero = load_roboto_flex(36, weight=250)
+            font_info = load_roboto_flex(46, weight=700)
+            font_name = load_roboto_flex(50, weight=700)
+            font_numero = load_roboto_flex(44, weight=700)
             tracking_info = 10
             tracking_name = 8
             
@@ -30,12 +30,22 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
             
             numero_txt = str(numero) if numero is not None else None
             gap = 28
+            line_gap = 34
             h_numero = text_height(font_numero) if numero_txt else 0
             h_info = text_height(font_info)
             h_name = text_height(font_name)
-            text_block = (h_numero + gap if numero_txt else 0) + gap + h_info + 18 + h_name
-            qr_size = min(max_w, area_bottom - area_top - text_block)
+            text_block = (h_numero + gap if numero_txt else 0) + gap + h_info + line_gap + h_name
+            qr_max = min(max_w, area_bottom - area_top - text_block)
+            # QR blanco sobre el fondo negro del diseño (el negro hace de margen)
+            qr = qrcode.QRCode(border=0)
+            qr.add_data(qr_url)
+            qr.make(fit=True)
+            qr_img = qr.make_image(fill_color="white", back_color="black").convert("RGB")
+            modules = qr.modules_count
+            # QR al 90% del espacio disponible, con módulos de tamaño entero
+            qr_size = max(1, round((qr_max // modules) * 0.9)) * modules
             qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
+            area_top += (qr_max - qr_size) // 2
             
             y = area_top
             if numero_txt:
@@ -43,9 +53,9 @@ def build_qr_image_with_text(qr_url: str, nombre: str, evento: str, telefono: st
                 y += h_numero + gap
             bg.paste(qr_img, ((W - qr_size) // 2, y))
             y += qr_size + gap
-            draw_tracked(draw, telefono or "", (W, y), font_info, tracking_info)
-            y += h_info + 18
             draw_tracked(draw, nombre, (W, y), font_name, tracking_name)
+            y += h_name + line_gap
+            draw_tracked(draw, telefono or "", (W, y), font_info, tracking_info)
             
             out = io.BytesIO()
             bg.save(out, format="PNG")
